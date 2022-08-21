@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  elasticsearch:
+    image: bitnami/elasticsearch:8.3.3
+    ports:
+      - ${ELASTICSEARCH_PORT_NUMBER}:${ELASTICSEARCH_PORT_NUMBER}
+    volumes:
+      - ./elasticsearch-data:/bitnami/elasticsearch/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:${ELASTICSEARCH_PORT_NUMBER}/_cluster/health?wait_for_status=yellow&timeout=50s",
+        ]
+  kibana:
+    image: bitnami/kibana:8.3.3
+    ports:
+      - ${KIBANA_PORT_NUMBER}:${KIBANA_PORT_NUMBER}
+    environment:
+      - KIBANA_ELASTICSEARCH_URL=elasticsearch
+      - KIBANA_ELASTICSEARCH_PORT_NUMBER=${ELASTICSEARCH_PORT_NUMBER}
+    volumes:
+      - ./kibana-data:/bitnami/kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
